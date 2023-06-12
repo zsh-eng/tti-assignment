@@ -100,9 +100,9 @@ func (c *RedisClient) GetMessagesFromRedis(ctx context.Context, chatID string, s
 // IMServiceImpl implements the last service interface defined in the IDL.
 type IMServiceImpl struct{}
 
+var client = NewRedisClient(context.Background())
+
 func (s *IMServiceImpl) Send(ctx context.Context, req *rpc.SendRequest) (*rpc.SendResponse, error) {
-	client := NewRedisClient(ctx)
-	
 	message := req.GetMessage()
 	if message.GetSendTime() == 0 {
 		message.SendTime = time.Now().Unix()
@@ -113,13 +113,13 @@ func (s *IMServiceImpl) Send(ctx context.Context, req *rpc.SendRequest) (*rpc.Se
 		return nil, err
 	}
 
-	resp := rpc.NewSendResponse()
-	resp.Code, resp.Msg = 0, "success"
-	return resp, nil
+	return &rpc.SendResponse{
+		Code: 0,
+		Msg:  "success",
+	}, nil
 }
 
 func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.PullResponse, error) {
-	client := NewRedisClient(ctx)
 	start := req.GetCursor()
 	stop := start + int64(req.GetLimit())
 	rev := req.GetReverse()
@@ -145,11 +145,3 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 		NextCursor: &nextCursor,
 	}, nil
 }
-
-// func areYouLucky() (int32, string) {
-// 	if rand.Int31n(2) == 1 {
-// 		return 0, "success"
-// 	} else {
-// 		return 500, "oops"
-// 	}
-// }
