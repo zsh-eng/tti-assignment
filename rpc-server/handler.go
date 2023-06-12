@@ -129,9 +129,8 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 		return nil, err
 	}
 
-	hasMore := false
-	if len(messages) == int(req.GetLimit())+1 {
-		hasMore = true
+	hasMore := len(messages) == int(req.GetLimit())+1
+	if hasMore {
 		messages = messages[:len(messages)-1]
 	}
 
